@@ -283,6 +283,10 @@ class AzurLaneAutoScript:
         from module.campaign.os_run import OSCampaignRun
         OSCampaignRun(config=self.config, device=self.device).opsi_shop()
 
+    def opsi_voucher(self):
+        from module.campaign.os_run import OSCampaignRun
+        OSCampaignRun(config=self.config, device=self.device).opsi_voucher()
+
     def opsi_daily(self):
         from module.campaign.os_run import OSCampaignRun
         OSCampaignRun(config=self.config, device=self.device).opsi_daily()
@@ -295,6 +299,10 @@ class AzurLaneAutoScript:
         from module.campaign.os_run import OSCampaignRun
         OSCampaignRun(config=self.config, device=self.device).opsi_abyssal()
 
+    def opsi_archive(self):
+        from module.campaign.os_run import OSCampaignRun
+        OSCampaignRun(config=self.config, device=self.device).opsi_archive()
+
     def opsi_stronghold(self):
         from module.campaign.os_run import OSCampaignRun
         OSCampaignRun(config=self.config, device=self.device).opsi_stronghold()
@@ -302,6 +310,14 @@ class AzurLaneAutoScript:
     def opsi_meowfficer_farming(self):
         from module.campaign.os_run import OSCampaignRun
         OSCampaignRun(config=self.config, device=self.device).opsi_meowfficer_farming()
+
+    def opsi_hazard1_leveling(self):
+        from module.campaign.os_run import OSCampaignRun
+        OSCampaignRun(config=self.config, device=self.device).opsi_hazard1_leveling()
+
+    def opsi_cross_month(self):
+        from module.campaign.os_run import OSCampaignRun
+        OSCampaignRun(config=self.config, device=self.device).opsi_cross_month()
 
     def main(self):
         from module.campaign.run import CampaignRun
