@@ -1,11 +1,14 @@
+from datetime import datetime
+
 import module.config.server as server
+from module.config.utils import get_server_next_update
 from module.base.button import ButtonGrid
 from module.base.timer import Timer
 from module.base.utils import *
 from module.logger import logger
 from module.ocr.ocr import Digit, DigitCounter
 from module.os_handler.assets import *
-from module.statistics.item import ItemGrid
+from module.statistics.item import Item, ItemGrid
 from module.ui.assets import OS_CHECK
 from module.ui.ui import UI
 
@@ -20,9 +23,17 @@ else:
     # The color of the digits ACTION_POINT_BUY_REMAIN is white in JP, which is light green in CN and EN.
     OCR_ACTION_POINT_BUY_REMAIN = DigitCounter(
         ACTION_POINT_BUY_REMAIN, letter=(255, 255, 255), lang='cnocr', name='OCR_ACTION_POINT_BUY_REMAIN')
+
+
+class ActionPointItem(Item):
+    def predict_valid(self):
+        return True
+
+
 ACTION_POINT_GRID = ButtonGrid(
     origin=(323, 274), delta=(173, 0), button_shape=(115, 115), grid_shape=(4, 1), name='ACTION_POINT_GRID')
 ACTION_POINT_ITEMS = ItemGrid(ACTION_POINT_GRID, templates={}, amount_area=(43, 89, 113, 113))
+ACTION_POINT_ITEMS.item_class = ActionPointItem
 ACTION_POINTS_COST = {
     1: 5,
     2: 10,
@@ -260,8 +271,13 @@ class ActionPointHandler(UI):
         if cost is None:
             cost = self.action_point_get_cost(zone, pinned)
         buy_checked = False
+        diff = get_server_next_update('00:00') - datetime.now()
+        today_rest = int(diff.total_seconds() // 600)
         if keep_current_ap:
-            if self._action_point_total <= self.config.OS_ACTION_POINT_PRESERVE:
+            if self._action_point_current + today_rest >= 200:
+                logger.info(f'The sum of the current action points and the rest action points that can be obtained today exceeds 200.')
+                logger.info(f'Current={self._action_point_current}  Rest={today_rest}')
+            elif self._action_point_total <= self.config.OS_ACTION_POINT_PRESERVE:
                 logger.info(f'Reach the limit of action points, preserve={self.config.OS_ACTION_POINT_PRESERVE}')
                 self.action_point_quit()
                 raise ActionPointLimit
