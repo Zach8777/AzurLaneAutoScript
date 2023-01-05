@@ -4,7 +4,6 @@ from module.logger import logger
 from module.os.assets import *
 from module.os_handler.action_point import ActionPointHandler
 from module.os_handler.assets import AUTO_SEARCH_REWARD
-from module.os_handler.map_event import MapEventHandler
 
 ZONE_TYPES = [ZONE_DANGEROUS, ZONE_SAFE, ZONE_OBSCURE, ZONE_ABYSSAL, ZONE_STRONGHOLD, ZONE_ARCHIVE]
 ZONE_SELECT = [SELECT_DANGEROUS, SELECT_SAFE, SELECT_OBSCURE, SELECT_ABYSSAL, SELECT_STRONGHOLD, SELECT_ARCHIVE]
@@ -19,7 +18,9 @@ class RewardUncollectedError(Exception):
     pass
 
 
-class GlobeOperation(ActionPointHandler, MapEventHandler):
+class GlobeOperation(ActionPointHandler):
+    _zone_unpin_interval = Timer(0.5)
+
     def is_in_globe(self):
         return self.appear(GLOBE_GOTO_MAP, offset=(20, 20))
 
@@ -73,11 +74,15 @@ class GlobeOperation(ActionPointHandler, MapEventHandler):
         Returns:
             bool: If handled.
         """
+        if not self._zone_unpin_interval.reached():
+            return False
+
         if self.is_zone_pinned():
             # A click does not disable pinned zone, a swipe does.
             self.device.swipe_vector(
                 (50, -50), box=area_pad(ZONE_PINNED.area, pad=-80), random_range=(-10, -10, 10, 10),
                 padding=0, name='PINNED_DISABLE')
+            self._zone_unpin_interval.reset()
             return True
 
         return False

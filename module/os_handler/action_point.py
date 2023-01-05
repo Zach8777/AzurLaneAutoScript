@@ -1,13 +1,14 @@
 from datetime import datetime
 
 import module.config.server as server
-from module.config.utils import get_server_next_update
 from module.base.button import ButtonGrid
 from module.base.timer import Timer
 from module.base.utils import *
+from module.config.utils import get_server_next_update
 from module.logger import logger
 from module.ocr.ocr import Digit, DigitCounter
 from module.os_handler.assets import *
+from module.os_handler.map_event import MapEventHandler
 from module.statistics.item import Item, ItemGrid
 from module.ui.assets import OS_CHECK
 from module.ui.ui import UI
@@ -15,6 +16,13 @@ from module.ui.ui import UI
 OCR_ACTION_POINT_REMAIN = Digit(ACTION_POINT_REMAIN, letter=(255, 219, 66), name='OCR_ACTION_POINT_REMAIN')
 OCR_ACTION_POINT_REMAIN_OS = Digit(ACTION_POINT_REMAIN_OS, letter=(239, 239, 239),
                                    threshold=160, name='OCR_SHOP_YELLOW_COINS_OS')
+
+OCR_OS_ADAPTABILITY = Digit([
+    OS_ADAPTABILITY_ATTACK,
+    OS_ADAPTABILITY_DURABILITY,
+    OS_ADAPTABILITY_RECOVER
+], letter=(231, 235, 239), lang="cnocr", name='OCR_OS_ADAPTABILITY')
+
 if server.server != 'jp':
     # Letters in ACTION_POINT_BUY_REMAIN are not the numeric fonts usually used in azur lane.
     OCR_ACTION_POINT_BUY_REMAIN = DigitCounter(
@@ -77,7 +85,7 @@ class ActionPointLimit(Exception):
     pass
 
 
-class ActionPointHandler(UI):
+class ActionPointHandler(UI, MapEventHandler):
     _action_point_box = [0, 0, 0, 0]
     _action_point_current = 0
     _action_point_total = 0
@@ -137,7 +145,11 @@ class ActionPointHandler(UI):
 
             self.action_point_update()
 
-            if sum(self._action_point_box[1:]) > 0 and self._action_point_box[0] > 0:
+            # Having boxes
+            if sum(self._action_point_box[1:]) > 0:
+                break
+            # Or having oil
+            if self._action_point_box[0] > 0:
                 break
 
     @staticmethod
@@ -323,7 +335,30 @@ class ActionPointHandler(UI):
         logger.warning('Failed to get action points after 12 trial')
         return False
 
-    def set_action_point(self, zone=None, pinned=None, cost=None, keep_current_ap=True):
+    def action_point_enter(self, skip_first_screenshot=True):
+        """
+        Pages:
+            in: OS_CHECK
+            out: ACTION_POINT_USE
+        """
+        while 1:
+            if skip_first_screenshot:
+                skip_first_screenshot = False
+            else:
+                self.device.screenshot()
+
+            if self.appear(ACTION_POINT_USE, offset=(20, 20)):
+                break
+
+            if self.appear(OS_CHECK, offset=(20, 20), interval=3):
+                self.device.click(ACTION_POINT_REMAIN_OS)
+                continue
+            if self.handle_map_event():
+                continue
+            if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50)):
+                continue
+
+    def action_point_set(self, zone=None, pinned=None, cost=None, keep_current_ap=True):
         """
         Args:
             zone (Zone): Zone to enter.
@@ -334,12 +369,42 @@ class ActionPointHandler(UI):
 
         Returns:
             bool: If handled.
+
+        Raises:
+            ActionPointLimit: If not having enough action points.
         """
-        self.ui_click(ACTION_POINT_REMAIN_OS, ACTION_POINT_USE, OS_CHECK)
+        self.action_point_enter()
         if not self.handle_action_point(zone, pinned, cost, keep_current_ap):
             return False
 
         while 1:
             if self.appear(IN_MAP, offset=(200, 5)):
-                return True
+                break
             self.device.screenshot()
+
+        return True
+
+    def action_point_check(self, amount):
+        """
+        Args:
+            amount: Check if having this amount of action points.
+
+        Returns:
+            bool: If having enough AP.
+        """
+        self.action_point_enter()
+        self.action_point_safe_get()
+
+        enough = self._action_point_total > amount
+        if enough:
+            logger.info(f'Having {amount} action points')
+        else:
+            logger.info(f'Not having {amount} action points')
+
+        self.action_point_quit()
+        while 1:
+            if self.appear(IN_MAP, offset=(200, 5)):
+                break
+            self.device.screenshot()
+
+        return enough
