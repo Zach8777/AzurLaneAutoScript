@@ -18,14 +18,13 @@ from module.shop.shop_voucher import VoucherShop
 
 
 class OperationSiren(OSMap):
-    def os_port_daily(self, mission=True, supply=True):
+    def os_port_daily(self, supply=True):
         """
         Accept all missions and buy all supplies in all ports.
         If reach the maximum number of missions, skip accept missions in next port.
         If not having enough yellow coins or purple coins, skip buying supplies in next port.
 
         Args:
-            mission (bool): If needs to accept missions.
             supply (bool): If needs to buy supplies.
 
         Returns:
@@ -263,7 +262,7 @@ class OperationSiren(OSMap):
             self.handle_after_auto_search()
 
     def os_shop(self):
-        self.os_port_daily(mission=False, supply=self.config.OpsiShop_BuySupply)
+        self.os_port_daily(supply=self.config.OpsiShop_BuySupply)
         self.config.task_delay(server_update=True)
 
     def _os_voucher_enter(self):
@@ -383,8 +382,8 @@ class OperationSiren(OSMap):
                 self.config.OS_ACTION_POINT_PRESERVE = 0
             logger.attr('OS_ACTION_POINT_PRESERVE', self.config.OS_ACTION_POINT_PRESERVE)
 
-            if self.get_yellow_coins() < 100000:
-                logger.info('Reach the limit of yellow coins, preserve=100000')
+            if self.get_yellow_coins() < self.config.OS_CL1_YELLOW_COINS_PRESERVE:
+                logger.info(f'Reach the limit of yellow coins, preserve={self.config.OS_CL1_YELLOW_COINS_PRESERVE}')
                 with self.config.multi_set():
                     self.config.task_delay(server_update=True)
                     if not self.is_in_opsi_explore():
@@ -701,6 +700,7 @@ class OperationSiren(OSMap):
                 # Re-enter to reset fleet position
                 prev = self.zone
                 self.globe_goto(self.zone_nearest_azur_port(self.zone))
+                self.handle_fog_block(repair=True)
                 self.globe_goto(prev, types='STRONGHOLD')
                 return False
             else:
@@ -708,6 +708,7 @@ class OperationSiren(OSMap):
                 # Re-enter to reset fleet position
                 prev = self.zone
                 self.globe_goto(self.zone_nearest_azur_port(self.zone))
+                self.handle_fog_block(repair=False)
                 self.globe_goto(prev, types='STRONGHOLD')
                 continue
 
@@ -760,6 +761,7 @@ class OperationSiren(OSMap):
 
         logger.hr("Month Boss precheck", level=2)
         self.os_mission_enter()
+        logger.attr('OpsiMonthBoss.Mode', self.config.OpsiMonthBoss_Mode)
         if self.appear(OS_MONTHBOSS_NORMAL, offset=(20, 20)):
             logger.attr('Month boss difficulty', 'normal')
             is_normal = True
@@ -809,15 +811,21 @@ class OperationSiren(OSMap):
         """
         if is_normal:
             if result:
-                next_reset = get_os_next_reset()
-                self.config.task_delay(target=next_reset)
-                self.config.task_stop()
+                if self.config.OpsiMonthBoss_Mode == 'normal_hard':
+                    logger.info('Monthly boss normal cleared, run hard boss then')
+                    self.config.task_stop()
+                else:
+                    logger.info('Monthly boss normal cleared, task stop')
+                    next_reset = get_os_next_reset()
+                    self.config.task_delay(target=next_reset)
+                    self.config.task_stop()
             else:
                 logger.info("Unable to clear the normal monthly boss, will try later")
                 self.config.opsi_task_delay(recon_scan=False, submarine_call=True, ap_limit=False)
                 self.config.task_stop()
         else:
             if result:
+                logger.info('Monthly boss hard cleared, task stop')
                 next_reset = get_os_next_reset()
                 self.config.task_delay(target=next_reset)
                 self.config.task_stop()
