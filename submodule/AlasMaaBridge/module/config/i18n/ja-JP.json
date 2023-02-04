@@ -231,6 +231,10 @@
       "name": "MaaFightWeekly._info.name",
       "help": "MaaFightWeekly._info.help"
     },
+    "Enable": {
+      "name": "MaaFightWeekly.Enable.name",
+      "help": "MaaFightWeekly.Enable.help"
+    },
     "Monday": {
       "name": "MaaFight.Stage.name",
       "help": "MaaFight.Stage.help",
@@ -505,9 +509,17 @@
       "name": "MaaCopilot.FileName.name",
       "help": "MaaCopilot.FileName.help"
     },
+    "Identify": {
+      "name": "MaaCopilot.Identify.name",
+      "help": "MaaCopilot.Identify.help"
+    },
     "Formation": {
       "name": "MaaCopilot.Formation.name",
       "help": "MaaCopilot.Formation.help"
+    },
+    "Cycle": {
+      "name": "MaaCopilot.Cycle.name",
+      "help": "MaaCopilot.Cycle.help"
     }
   },
   "Storage": {
