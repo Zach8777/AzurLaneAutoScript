@@ -66,7 +66,7 @@ DropRecord:
   AzurStatsID: null
   API:
     value: default
-    option: [ default, cn_gz_reverse_proxy, cn_sh_reverse_proxy ]
+    option: [ default, cn_gz_reverse_proxy]
   ResearchRecord:
     value: do_not
     option: [ do_not, save, upload, save_and_upload ]
@@ -234,11 +234,12 @@ C124LargeLeveling:
     value: 3
     option: [ 3, 4, 5 ]
 GemsFarming:
-  FlagshipChange: true
-  FlagshipEquipChange: false
-  VanguardChange: false
-  VanguardEquipChange: false
-  LowEmotionRetreat: true
+  ChangeFlagship:
+    value: ship
+    option: [ ship, ship_equip ]
+  ChangeVanguard:
+    value: ship
+    option: [ disabled, ship, ship_equip ]
   CommonCV:
     value: any
     option: [ any, langley, bogue, ranger, hermes ]
