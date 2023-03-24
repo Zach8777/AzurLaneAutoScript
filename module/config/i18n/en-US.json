@@ -16,6 +16,10 @@
       "name": "Event",
       "help": ""
     },
+    "EventDaily": {
+      "name": "Event Daily",
+      "help": ""
+    },
     "Reward": {
       "name": "Reward",
       "help": ""
@@ -70,12 +74,32 @@
       "name": "Event General",
       "help": ""
     },
+    "Coalition": {
+      "name": "Frostfall",
+      "help": ""
+    },
     "Event": {
       "name": "Event",
       "help": ""
     },
     "Event2": {
       "name": "Event-2",
+      "help": ""
+    },
+    "Raid": {
+      "name": "Raid",
+      "help": ""
+    },
+    "MaritimeEscort": {
+      "name": "Maritime Escort",
+      "help": ""
+    },
+    "WarArchives": {
+      "name": "War Archives",
+      "help": "Due to the lack of maintenance of war archives, continuous clear may not work normally, if Alas runs abnormally, Please manually finish clearing and use auto search"
+    },
+    "CoalitionSp": {
+      "name": "Frostfall Daily SP",
       "help": ""
     },
     "EventA": {
@@ -98,20 +122,8 @@
       "name": "Event Daily SP",
       "help": ""
     },
-    "WarArchives": {
-      "name": "War Archives",
-      "help": "Due to the lack of maintenance of war archives, continuous clear may not work normally, if Alas runs abnormally, Please manually finish clearing and use auto search"
-    },
-    "Raid": {
-      "name": "Raid",
-      "help": ""
-    },
     "RaidDaily": {
       "name": "Raid Daily",
-      "help": ""
-    },
-    "MaritimeEscort": {
-      "name": "Maritime Escort",
       "help": ""
     },
     "Commission": {
@@ -634,6 +646,8 @@
       "name": "Event Name",
       "help": "Automatically selects to the latest event",
       "campaign_main": "campaign_main",
+      "coalition_20230323": "Frostfall",
+      "raid_20220630": "Angel of Iris",
       "event_20210422_cn": "Daedalian Hymn Rerun",
       "event_20210624_cn": "Swirling Cherry Blossoms Rerun",
       "event_20230223_cn": "Revelations of Dust",
@@ -660,7 +674,6 @@
       "event_20220728_cn": "Aquilifers Ballade",
       "event_20200917_cn": "Dreamwakers Butterfly Rerun",
       "event_20201029_cn": "Universe in Unison",
-      "raid_20220630": "Angel of Iris",
       "raid_20210708": "Cross Wave rerun",
       "event_20200820_cn": "Scherzo of Iron and Blood Rerun",
       "event_20201012_cn": "Sundered Blue Rerun",
@@ -695,6 +708,7 @@
       "event_20200423_cn": "Crimson Echoes Rerun",
       "event_20200326_cn": "Microlayer Medley",
       "event_20200227_cn": "Northern Overture",
+      "war_archives_20211028_cn": "archives Skybound Oratorio",
       "war_archives_20210819_cn": "archives Microlayer Medley",
       "war_archives_20200903_cn": "archives Stars of the Shimmering Fjord",
       "war_archives_20201029_cn": "archives Universe in Unison",
@@ -713,8 +727,7 @@
       "war_archives_20190620_en": "archives Glorious Battle",
       "war_archives_20190321_en": "archives Visitors Dyed in Red",
       "war_archives_20191031_en": "archives Divergent Chessboard",
-      "war_archives_20181020_en": "archives Strive Wish and Strategize",
-      "war_archives_20211028_cn": "archives Skybound Oratorio"
+      "war_archives_20181020_en": "archives Strive Wish and Strategize"
     },
     "Mode": {
       "name": "Level Mode",
@@ -1192,6 +1205,18 @@
     "Enable": {
       "name": "Enable maritime Escort",
       "help": ""
+    }
+  },
+  "Coalition": {
+    "_info": {
+      "name": "Event Settings",
+      "help": "Fleets must be prepared manually in game before running"
+    },
+    "Fleet": {
+      "name": "Fleet",
+      "help": "",
+      "single": "Solo Challenge",
+      "multi": "Coalition Battle"
     }
   },
   "Commission": {
@@ -1710,7 +1735,7 @@
     },
     "BuyAmount": {
       "name": "Buy Amount",
-      "help": "The 1st and 2nd purchase everyday are free\nDiscounts are applied to the 3rd and onwards, gradually minimizing until full price\nExact discounts found at <https://azurlane.koumakan.jp/Research#Strengthening>"
+      "help": "The 1st and 2nd purchase everyday are free\nDiscounts are applied to the 3rd and onwards, gradually minimizing until full price\nExact discounts found at <https://azurlane.koumakan.jp/wiki/Research#Enhancing>"
     },
     "LastRun": {
       "name": "Last Purchase Time",
@@ -1946,7 +1971,24 @@
       "second": "second"
     },
     "ModuleDevelopmentFleet": {
-      "name": "Tactical Training Fleet",
+      "name": "Module Development Fleet",
+      "help": "",
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6"
+    },
+    "EmergencyModuleDevelopment": {
+      "name": "Emergency Module Development Preference",
+      "help": "",
+      "skip": "skip",
+      "first": "first",
+      "second": "second"
+    },
+    "EmergencyModuleDevelopmentFleet": {
+      "name": "Emergency Module Development Fleet",
       "help": "",
       "1": "1",
       "2": "2",

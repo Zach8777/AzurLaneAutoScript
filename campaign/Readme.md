@@ -33,7 +33,7 @@ To add a new event, add a new row in here, and run `python -m module.config.conf
 | 20221013   | war archives 20201029 cn | Universe in Unison              | 激唱的UNIVERSE | Universe in Unison                  | 激唱のユニバース       | -                    |
 | 20221117   | war archives 20200903 cn | Stars of the Shimmering Fjord   | 峡湾间的星辰    | Stars of the Shimmering Fjord      | 輝ける峡湾の星        | -                    |
 | 20221117   | war archives 20210819 cn | Microlayer Medley               | 微层混合      | Microlayer Medley                  | 闇靄払う銀翼          | -                    |
-| 20211028   | war archives  20211028 cn| Skybound Oratorio               | 穹顶下的圣咏曲   | Skybound Oratorio              | 神穹を衝く聖歌        | -                    |
+| 20211028   | war archives 20211028 cn | Skybound Oratorio               | 穹顶下的圣咏曲   | Skybound Oratorio              | 神穹を衝く聖歌        | 穹頂下的聖詠曲         |
 | 20200227   | event 20200227 cn        | Northern Overture               | 北境序曲      | Northern Overture                   | 凍絶の北海          | -                    |
 | 20200312   | event 20200312 cn        | The Solomon Ranger              | 复刻斯图尔特的硝烟 | The Solomon Ranger Rerun            | 南洋に靡く硝煙（復刻）    | -                    |
 | 20200326   | event 20200326 cn        | Microlayer Medley               | 微层混合      | Microlayer Medley                   | 闇靄払う銀翼         | -                    |
@@ -134,5 +134,7 @@ To add a new event, add a new row in here, and run `python -m module.config.conf
 | 20230202 | event 20200806 cn | The Enigma and the Shark | - | - | - | 復刻最重要的寶物 |
 | 20230216 | event 20220224 cn | Abyssal Refrain | - | - | - | 深度回音 |
 | 20230223 | event 20230223 cn | Revelations of Dust | 湮烬尘墟 | Revelations of Dust | 黙示の遺構 | - |
-| 20230309 | event 20210624 cn | Swirling Cherry Blossoms | - | - | - | 復刻-浮櫻影華
+| 20230309 | event 20210624 cn | Swirling Cherry Blossoms | - | - | - | 復刻-浮櫻影華 |
 | 20230309 | event 20210422 cn | Daedalian Hymn | 复刻复兴的赞美诗 | Daedalian Hymn Rerun | 讃える復興の迷路（復刻） | - |
+| 20230323 | raid 20220630 | Angel of Iris | - | - | - | 來自鳶尾的天使 |
+| 20230323 | coalition 20230323 | Frostfall | 极地风暴 | Frostfall | 星霜海嵐 | - |

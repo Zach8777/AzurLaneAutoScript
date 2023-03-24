@@ -19,6 +19,7 @@ OCR_DAILY_FLEET_INDEX = Digit(OCR_DAILY_FLEET_INDEX, letter=(90, 154, 255), thre
 class Daily(Combat, DailyEquipment):
     daily_current: int
     daily_checked: list
+    emergency_module_development = False
 
     def is_active(self):
         color = get_color(image=self.device.image, area=DAILY_ACTIVE.area)
@@ -59,36 +60,68 @@ class Daily(Combat, DailyEquipment):
             int: Stage index, 0 to 3
             int: Fleet index, 1 to 6
         """
-        # Meaning of daily_current
-        # 1 Tactical Training 战术研修
-        # 2 Supply Line Disruption 破交作战
-        # 3 Module Development 兵装训练
-        # 4 (not open)
-        # 5 Escort Mission 商船护送
-        # 6 Advance Mission 海域突进
-        # 7 Fierce Assault 斩首行动
-        fleets = [
-            0,
-            self.config.Daily_TacticalTrainingFleet,
-            0,  # Supply Line Disruption, which needs to be done manually or to be done by daily skip
-            self.config.Daily_ModuleDevelopmentFleet,
-            0,  # Empty
-            self.config.Daily_EscortMissionFleet,
-            self.config.Daily_AdvanceMissionFleet,
-            self.config.Daily_FierceAssaultFleet,
-            0
-        ]
-        stages = [
-            0,
-            self.config.Daily_TacticalTraining,
-            self.config.Daily_SupplyLineDisruption,
-            self.config.Daily_ModuleDevelopment,
-            0,  # Empty
-            self.config.Daily_EscortMission,
-            self.config.Daily_AdvanceMission,
-            self.config.Daily_FierceAssault,
-            0
-        ]
+        if self.emergency_module_development:
+            # Meaning of daily_current
+            # 1 Emergency Module Development 限时兵装训练
+            # 2 Supply Line Disruption 破交作战
+            # 3 Module Development 兵装训练
+            # 4 Tactical Training 战术研修
+            # 5 Escort Mission 商船护送
+            # 6 Advance Mission 海域突进
+            # 7 Fierce Assault 斩首行动
+            fleets = [
+                0,
+                self.config.Daily_EmergencyModuleDevelopmentFleet,
+                0,  # Supply Line Disruption, which needs to be done manually or to be done by daily skip
+                self.config.Daily_ModuleDevelopmentFleet,
+                self.config.Daily_TacticalTrainingFleet,
+                self.config.Daily_EscortMissionFleet,
+                self.config.Daily_AdvanceMissionFleet,
+                self.config.Daily_FierceAssaultFleet,
+                0
+            ]
+            stages = [
+                0,
+                self.config.Daily_EmergencyModuleDevelopment,
+                self.config.Daily_SupplyLineDisruption,
+                self.config.Daily_ModuleDevelopment,
+                self.config.Daily_TacticalTraining,
+                self.config.Daily_EscortMission,
+                self.config.Daily_AdvanceMission,
+                self.config.Daily_FierceAssault,
+                0
+            ]
+        else:
+            # Meaning of daily_current
+            # 1 Tactical Training 战术研修
+            # 2 Fierce Assault 斩首行动
+            # 3 Supply Line Disruption 破交作战
+            # 4 Module Development 兵装训练
+            # 5 (not open)
+            # 6 Escort Mission 商船护送
+            # 7 Advance Mission 海域突进
+            fleets = [
+                0,
+                self.config.Daily_TacticalTrainingFleet,
+                self.config.Daily_FierceAssaultFleet,
+                0,  # Supply Line Disruption, which needs to be done manually or to be done by daily skip
+                self.config.Daily_ModuleDevelopmentFleet,
+                0,  # Empty
+                self.config.Daily_EscortMissionFleet,
+                self.config.Daily_AdvanceMissionFleet,
+                0
+            ]
+            stages = [
+                0,
+                self.config.Daily_TacticalTraining,
+                self.config.Daily_FierceAssault,
+                self.config.Daily_SupplyLineDisruption,
+                self.config.Daily_ModuleDevelopment,
+                0,  # Empty
+                self.config.Daily_EscortMission,
+                self.config.Daily_AdvanceMission,
+                0
+            ]
         dic = {
             'skip': 0,
             'first': 1,
@@ -102,6 +135,20 @@ class Daily(Combat, DailyEquipment):
             logger.warning(f'Unknown daily stage `{stage}` from daily_current={self.daily_current}')
         stage = dic.get(stage, 0)
         return int(stage), int(fleet)
+
+    @property
+    def supply_line_disruption_index(self):
+        if self.emergency_module_development:
+            return 2
+        else:
+            return 3
+
+    @property
+    def empty_index(self):
+        if self.emergency_module_development:
+            return 4
+        else:
+            return 5
 
     def daily_execute(self, remain=3, stage=1, fleet=1):
         """
@@ -117,7 +164,7 @@ class Daily(Combat, DailyEquipment):
             in: page_daily
             out: page_daily
         """
-        logger.hr(f'Daily {self.daily_current}')
+        logger.hr(f'Daily {self.daily_current}', level=2)
         logger.info(f'remain={remain}, stage={stage}, fleet={fleet}')
 
         def daily_enter_check():
@@ -220,6 +267,8 @@ class Daily(Combat, DailyEquipment):
         self.device.sleep(0.2)
         self.device.screenshot()
         self.daily_current = 1
+        self.emergency_module_development = self.appear(ENTRANCE_EMERGENCY_MODULE_DEVELOPMENT, offset=(25, 50))
+        logger.attr('emergency_module_development', self.emergency_module_development)
 
         logger.info(f'Checked_list: {self.daily_checked}')
         for _ in range(max(self.daily_checked)):
@@ -228,13 +277,13 @@ class Daily(Combat, DailyEquipment):
         while 1:
             if self.daily_current > 7:
                 break
-            if self.daily_current == 4:
+            if self.daily_current == self.empty_index:
                 logger.info('This daily is not open now')
                 self.daily_check()
                 self.next()
                 continue
             stage, fleet = self.get_daily_stage_and_fleet()
-            if self.daily_current == 2 and not self.config.Daily_UseDailySkip:
+            if self.daily_current == self.supply_line_disruption_index and not self.config.Daily_UseDailySkip:
                 logger.info('Skip supply line disruption if UseDailySkip disabled')
                 self.daily_check()
                 self.next()
@@ -244,7 +293,7 @@ class Daily(Combat, DailyEquipment):
                 self.daily_check()
                 self.next()
                 continue
-            if self.daily_current != 2 and not fleet:
+            if self.daily_current != self.supply_line_disruption_index and not fleet:
                 logger.info(f'No fleet set on daily_current: {self.daily_current}, skip')
                 self.daily_check()
                 self.next()
@@ -271,6 +320,9 @@ class Daily(Combat, DailyEquipment):
 
         while 1:
             self.daily_run_one()
+
+            if self.emergency_module_development:
+                self.daily_checked = [0]
 
             if max(self.daily_checked) >= 7:
                 logger.info('Daily clear complete.')

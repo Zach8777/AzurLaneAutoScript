@@ -16,6 +16,10 @@
       "name": "活动",
       "help": ""
     },
+    "EventDaily": {
+      "name": "活动每日",
+      "help": ""
+    },
     "Reward": {
       "name": "收获",
       "help": ""
@@ -70,12 +74,32 @@
       "name": "活动通用设置",
       "help": ""
     },
+    "Coalition": {
+      "name": "极地风暴",
+      "help": ""
+    },
     "Event": {
       "name": "活动图",
       "help": ""
     },
     "Event2": {
       "name": "活动图-2",
+      "help": ""
+    },
+    "Raid": {
+      "name": "共斗活动",
+      "help": ""
+    },
+    "MaritimeEscort": {
+      "name": "商船护航",
+      "help": ""
+    },
+    "WarArchives": {
+      "name": "作战档案",
+      "help": "由于作战档案缺少维护，开荒功能不一定能正常使用，如果发现Alas运行异常，请手动完成开荒后使用自律寻敌功能"
+    },
+    "CoalitionSp": {
+      "name": "极地风暴每日SP",
       "help": ""
     },
     "EventA": {
@@ -98,20 +122,8 @@
       "name": "活动每日SP图",
       "help": ""
     },
-    "WarArchives": {
-      "name": "作战档案",
-      "help": "由于作战档案缺少维护，开荒功能不一定能正常使用，如果发现Alas运行异常，请手动完成开荒后使用自律寻敌功能"
-    },
-    "Raid": {
-      "name": "共斗活动",
-      "help": ""
-    },
     "RaidDaily": {
       "name": "共斗活动每日",
-      "help": ""
-    },
-    "MaritimeEscort": {
-      "name": "商船护航",
       "help": ""
     },
     "Commission": {
@@ -634,6 +646,8 @@
       "name": "活动名称",
       "help": "自动选择至最新的活动",
       "campaign_main": "主线图",
+      "coalition_20230323": "极地风暴",
+      "raid_20220630": "来自鸢尾的天使",
       "event_20210422_cn": "复刻复兴的赞美诗",
       "event_20210624_cn": "复刻浮樱影华",
       "event_20230223_cn": "湮烬尘墟",
@@ -660,7 +674,6 @@
       "event_20220728_cn": "雄鹰的叙事歌",
       "event_20200917_cn": "复刻蝶海梦花",
       "event_20201029_cn": "激唱的UNIVERSE",
-      "raid_20220630": "来自鸢尾的天使",
       "raid_20210708": "复刻穿越彼方的水线",
       "event_20200820_cn": "复刻铁血音符誓言",
       "event_20201012_cn": "复刻划破海空之翼",
@@ -695,6 +708,7 @@
       "event_20200423_cn": "复刻苍红的回响",
       "event_20200326_cn": "微层混合",
       "event_20200227_cn": "北境序曲",
+      "war_archives_20211028_cn": "档案 穹顶下的圣咏曲",
       "war_archives_20210819_cn": "档案 微层混合",
       "war_archives_20200903_cn": "档案 峡湾间的星辰",
       "war_archives_20201029_cn": "档案 激唱的UNIVERSE",
@@ -713,8 +727,7 @@
       "war_archives_20190620_en": "档案 光荣的一战",
       "war_archives_20190321_en": "档案 红染的参访者",
       "war_archives_20191031_en": "档案 异色格",
-      "war_archives_20181020_en": "档案 努力希望和计划",
-      "war_archives_20211028_cn": "档案 穹顶下的圣咏曲"
+      "war_archives_20181020_en": "档案 努力希望和计划"
     },
     "Mode": {
       "name": "关卡模式",
@@ -1192,6 +1205,18 @@
     "Enable": {
       "name": "启用商船护航",
       "help": ""
+    }
+  },
+  "Coalition": {
+    "_info": {
+      "name": "活动设置",
+      "help": "出击前必须在游戏内手动配队"
+    },
+    "Fleet": {
+      "name": "出击队伍",
+      "help": "",
+      "single": "单队连战",
+      "multi": "多队出击"
     }
   },
   "Commission": {
@@ -1946,6 +1971,23 @@
       "second": "第二个"
     },
     "ModuleDevelopmentFleet": {
+      "name": "兵装训练出击舰队",
+      "help": "",
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6"
+    },
+    "EmergencyModuleDevelopment": {
+      "name": "限时兵装训练（限时兵装本）",
+      "help": "",
+      "skip": "不打",
+      "first": "第一个",
+      "second": "第二个"
+    },
+    "EmergencyModuleDevelopmentFleet": {
       "name": "兵装训练出击舰队",
       "help": "",
       "1": "1",
