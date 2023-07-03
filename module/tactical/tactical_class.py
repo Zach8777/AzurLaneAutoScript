@@ -18,7 +18,7 @@ from module.tactical.assets import *
 from module.ui.assets import (BACK_ARROW, MAIN_GOTO_REWARD,
                               REWARD_GOTO_TACTICAL, REWARD_CHECK,
                               TACTICAL_CHECK)
-from module.ui.ui import page_reward
+from module.ui.page import page_reward
 
 SKILL_GRIDS = ButtonGrid(origin=(315, 140), delta=(621, 132), button_shape=(621, 119), grid_shape=(1, 3), name='SKILL')
 SKILL_LEVEL_GRIDS = SKILL_GRIDS.crop(area=(406, 98, 618, 116), name='EXP')
@@ -543,6 +543,10 @@ class RewardTacticalClass(Dock):
 
     def select_suitable_ship(self):
         logger.hr(f'Select suitable ship')
+
+        # reset filter
+        self.dock_filter_set()
+
         # Set if favorite from config
         self.dock_favourite_set(enable=self.config.AddNewStudent_Favorite)
 
@@ -619,8 +623,10 @@ class RewardTacticalClass(Dock):
             level = skill_level.upper().replace(' ', '')
             # Empty skill slot
             # Probably because all favourite ships have their skill leveled max.
-            # '———l'
+            # '———l', '—l'
             if re.search(r'[—\-一]{2,}', level):
+                continue
+            if re.search(r'[—一]+', level):
                 continue
             # Use 'MA' as a part of `MAX`.
             # SKILL_LEVEL_GRIDS may move a little lower for unknown reason, OCR results are like:

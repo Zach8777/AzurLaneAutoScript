@@ -6,10 +6,13 @@ import re
 
 from module.campaign.campaign_base import CampaignBase
 from module.campaign.campaign_event import CampaignEvent
+from module.campaign.campaign_ui import MODE_SWITCH_1
 from module.config.config import AzurLaneConfig
 from module.exception import CampaignEnd, RequestHumanTakeover, ScriptEnd
 from module.handler.fast_forward import map_files, to_map_file_name
 from module.logger import logger
+from module.notify import handle_notify
+from module.ui.page import page_campaign
 
 
 class CampaignRun(CampaignEvent):
@@ -74,11 +77,21 @@ class CampaignRun(CampaignEvent):
             logger.hr('Triggered stop condition: Run count')
             self.config.StopCondition_RunCount = 0
             self.config.Scheduler_Enable = False
+            handle_notify(
+                self.config.Error_OnePushConfig,
+                title=f"Alas <{self.config.config_name}> campaign finished",
+                content=f"<{self.config.config_name}> {self.name} reached run count limit"
+            )
             return True
         # Lv120 limit
         if self.config.StopCondition_ReachLevel and self.campaign.config.LV_TRIGGERED:
             logger.hr(f'Triggered stop condition: Reach level {self.config.StopCondition_ReachLevel}')
             self.config.Scheduler_Enable = False
+            handle_notify(
+                self.config.Error_OnePushConfig,
+                title=f"Alas <{self.config.config_name}> campaign finished",
+                content=f"<{self.config.config_name}> {self.name} reached level limit"
+            )
             return True
         # Oil limit
         if oil_check:
@@ -95,6 +108,11 @@ class CampaignRun(CampaignEvent):
         if self.config.StopCondition_GetNewShip and self.campaign.config.GET_SHIP_TRIGGERED:
             logger.hr('Triggered stop condition: Get new ship')
             self.config.Scheduler_Enable = False
+            handle_notify(
+                self.config.Error_OnePushConfig,
+                title=f"Alas <{self.config.config_name}> campaign finished",
+                content=f"<{self.config.config_name}> {self.name} got new ship"
+            )
             return True
         # Event limit
         if oil_check and self.campaign.event_pt_limit_triggered():
@@ -133,7 +151,7 @@ class CampaignRun(CampaignEvent):
 
         return False
 
-    def handle_stage_name(self, name, folder):
+    def handle_stage_name(self, name, folder, mode='normal'):
         """
         Handle wrong stage names.
         In some events, the name of SP may be different, such as 'vsp', muse sp.
@@ -148,6 +166,18 @@ class CampaignRun(CampaignEvent):
         """
         name = re.sub('[ \t\n]', '', str(name)).lower()
         name = to_map_file_name(name)
+        # For GemsFarming, auto choose events or main chapters
+        if self.config.task.command == 'GemsFarming':
+            if self.stage_is_main(name):
+                logger.info(f'Stage name {name} is from campaign_main')
+                folder = 'campaign_main'
+            else:
+                folder = self.config.cross_get('Event.Campaign.Event')
+                if folder is not None:
+                    logger.info(f'Stage name {name} is from event {folder}')
+                else:
+                    logger.warning(f'Cannot get the latest event, fallback to campaign_main')
+                    folder = 'campaign_main'
         # Handle special names SP maps
         if folder == 'event_20201126_cn' and name == 'vsp':
             name = 'sp'
@@ -174,7 +204,11 @@ class CampaignRun(CampaignEvent):
             'd2': 'ht5',
             'd3': 'ht6',
         }
-        if folder in ['event_20200917_cn', 'event_20221124_cn']:
+        if folder in [
+            'event_20200917_cn',
+            'event_20221124_cn',
+            'event_20230525_cn',
+        ]:
             name = convert.get(name, name)
         else:
             reverse = {v: k for k, v in convert.items()}
@@ -207,19 +241,11 @@ class CampaignRun(CampaignEvent):
                                 f'run ordered stage: {stage}')
                 name = stage.lower()
                 self.is_stage_loop = True
-        # For GemsFarming, auto choose events or main chapters
-        if self.config.task.command == 'GemsFarming':
-            if self.stage_is_main(name):
-                logger.info(f'Stage name {name} is from campaign_main')
-                folder = 'campaign_main'
-            else:
-                folder = self.config.cross_get('Event.Campaign.Event')
-                if folder is not None:
-                    logger.info(f'Stage name {name} is from event {folder}')
-                else:
-                    logger.warning(f'Cannot get the latest event, fallback to campaign_main')
-                    folder = 'campaign_main'
-
+        # Convert campaign_main to campaign hard if mode is hard and file exists
+        if mode == 'hard' and folder == 'campaign_main'\
+                and name in map_files('campaign_hard'):
+            folder = 'campaign_hard'
+            
         return name, folder
 
     def can_use_auto_search_continue(self):
@@ -254,7 +280,7 @@ class CampaignRun(CampaignEvent):
             mode (str): `normal` or `hard`
             total (int):
         """
-        name, folder = self.handle_stage_name(name, folder)
+        name, folder = self.handle_stage_name(name, folder, mode=mode)
         self.config.override(Campaign_Name=name, Campaign_Event=folder)
         self.load_campaign(name, folder=folder)
         self.run_count = 0
@@ -295,6 +321,15 @@ class CampaignRun(CampaignEvent):
             else:
                 self.campaign.ensure_campaign_ui(name=self.stage, mode=mode)
             self.handle_commission_notice()
+
+            # if in hard mode, check remain times
+            if self.ui_page_appear(page_campaign) and MODE_SWITCH_1.get(main=self) == 'normal':
+                from module.hard.hard import OCR_HARD_REMAIN
+                remain = OCR_HARD_REMAIN.ocr(self.device.image)
+                if not remain:
+                    logger.info('Remaining number of times of hard mode campaign_main is 0, delay task to next day')
+                    self.config.task_delay(server_update=True)
+                    break
 
             # End
             if self.triggered_stop_condition(oil_check=not self.campaign.is_in_auto_search_menu()):

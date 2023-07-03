@@ -3,6 +3,7 @@
 
 Aside:
   Install:
+  Home:
   Develop:
   Performance:
   Setting:
@@ -58,6 +59,7 @@ AddAlas:
   Confirm:
   FileExist:
   InvalidChar:
+  InvalidPrefixTemplate:
 
 Update:
   UpToDate:

@@ -97,7 +97,7 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
         # Task means the name of the function to run in AzurLaneAutoScript class.
         self.task: Function
         # Template config is used for dev tools
-        self.is_template_config = config_name == "template"
+        self.is_template_config = config_name.startswith("template")
 
         if self.is_template_config:
             # For dev tools
@@ -509,6 +509,9 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
                     "OpsiObscure",
                     "OpsiAbyssal",
                     "OpsiStronghold",
+                    # Delay OpsiArchive, since OpsiArchive and OpsiDaily share the same mission list,
+                    # although it does not requires any AP to enter.
+                    "OpsiArchive",
                     "OpsiMeowfficerFarming",
                 ]
             )

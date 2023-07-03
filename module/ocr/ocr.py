@@ -1,4 +1,3 @@
-import re
 import time
 from datetime import timedelta
 from typing import TYPE_CHECKING
@@ -21,6 +20,7 @@ else:
 
 class Ocr:
     SHOW_LOG = True
+    SHOW_REVISE_WARNING = False
 
     def __init__(self, buttons, lang='azur_lane', letter=(255, 255, 255), threshold=128, alphabet=None, name=None):
         """
@@ -102,7 +102,7 @@ class Ocr:
 
         if len(self.buttons) == 1:
             result_list = result_list[0]
-        if Ocr.SHOW_LOG:
+        if self.SHOW_LOG:
             logger.attr(name='%s %ss' % (self.name, float2str(time.time() - start_time)),
                         text=str(result_list))
 
@@ -141,18 +141,20 @@ class Digit(Ocr):
     Method ocr() returns int, or a list of int.
     """
 
-    def __init__(self, buttons, lang='azur_lane', letter=(255, 255, 255), threshold=128, alphabet='0123456789IDS',
+    def __init__(self, buttons, lang='azur_lane', letter=(255, 255, 255), threshold=128, alphabet='0123456789IDSB',
                  name=None):
         super().__init__(buttons, lang=lang, letter=letter, threshold=threshold, alphabet=alphabet, name=name)
 
     def after_process(self, result):
         result = super().after_process(result)
         result = result.replace('I', '1').replace('D', '0').replace('S', '5')
+        result = result.replace('B', '8')
 
         prev = result
         result = int(result) if result else 0
-        if str(result) != prev:
-            logger.warning(f'OCR {self.name}: Result "{prev}" is revised to "{result}"')
+        if self.SHOW_REVISE_WARNING:
+            if str(result) != prev:
+                logger.warning(f'OCR {self.name}: Result "{prev}" is revised to "{result}"')
 
         return result
 
@@ -162,13 +164,14 @@ class DigitYuv(Digit, OcrYuv):
 
 
 class DigitCounter(Ocr):
-    def __init__(self, buttons, lang='azur_lane', letter=(255, 255, 255), threshold=128, alphabet='0123456789/IDS',
+    def __init__(self, buttons, lang='azur_lane', letter=(255, 255, 255), threshold=128, alphabet='0123456789/IDSB',
                  name=None):
         super().__init__(buttons, lang=lang, letter=letter, threshold=threshold, alphabet=alphabet, name=name)
 
     def after_process(self, result):
         result = super().after_process(result)
         result = result.replace('I', '1').replace('D', '0').replace('S', '5')
+        result = result.replace('B', '8')
         return result
 
     def ocr(self, image, direct_ocr=False):
@@ -202,13 +205,14 @@ class DigitCounterYuv(DigitCounter, OcrYuv):
 
 
 class Duration(Ocr):
-    def __init__(self, buttons, lang='azur_lane', letter=(255, 255, 255), threshold=128, alphabet='0123456789:IDS',
+    def __init__(self, buttons, lang='azur_lane', letter=(255, 255, 255), threshold=128, alphabet='0123456789:IDSB',
                  name=None):
         super().__init__(buttons, lang=lang, letter=letter, threshold=threshold, alphabet=alphabet, name=name)
 
     def after_process(self, result):
         result = super().after_process(result)
         result = result.replace('I', '1').replace('D', '0').replace('S', '5')
+        result = result.replace('B', '8')
         return result
 
     def ocr(self, image, direct_ocr=False):
@@ -250,3 +254,4 @@ class Duration(Ocr):
 
 class DurationYuv(Duration, OcrYuv):
     pass
+

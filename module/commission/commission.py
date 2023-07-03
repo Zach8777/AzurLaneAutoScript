@@ -15,7 +15,8 @@ from module.exception import GameStuckError
 from module.handler.info_handler import InfoHandler
 from module.logger import logger
 from module.map.map_grids import SelectedGrids
-from module.ui.assets import COMMISSION_CHECK, REWARD_GOTO_COMMISSION, MAIN_GOTO_REWARD
+from module.retire.assets import DOCK_CHECK
+from module.ui.assets import BACK_ARROW, COMMISSION_CHECK, REWARD_GOTO_COMMISSION, MAIN_GOTO_REWARD
 from module.ui.page import page_reward, MAIN_CHECK
 from module.ui.scroll import Scroll
 from module.ui.switch import Switch
@@ -124,7 +125,7 @@ class RewardCommission(UI, InfoHandler):
         total = total[::-1]
         self.max_commission = 4
         for comm in total:
-            if comm.genre == 'event_daily':
+            if comm.genre == 'daily_event':
                 self.max_commission = 5
         running_count = int(
             np.sum([1 for c in total if c.status == 'running']))
@@ -373,6 +374,11 @@ class RewardCommission(UI, InfoHandler):
             if self.appear_then_click(COMMISSION_START, offset=(5, 20), interval=7):
                 comm_timer.reset()
                 pass
+            # Accidentally entered dock
+            if self.appear(DOCK_CHECK, offset=(20, 20), interval=3):
+                logger.info(f'equip_enter {DOCK_CHECK} -> {BACK_ARROW}')
+                self.device.click(BACK_ARROW)
+                continue
 
             # End
             if self.info_bar_count():

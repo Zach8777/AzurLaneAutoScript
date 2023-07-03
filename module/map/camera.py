@@ -5,9 +5,10 @@ import numpy as np
 from module.base.timer import Timer
 from module.base.utils import area_offset
 from module.combat.assets import GET_ITEMS_1, GET_ITEMS_1_RYZA
-from module.exception import CampaignEnd, MapDetectionError
+from module.exception import CampaignEnd, GameNotRunningError, MapDetectionError
 from module.handler.assets import AUTO_SEARCH_MENU_CONTINUE, GAME_TIPS
 from module.logger import logger
+from module.map.assets import MAP_PREPARATION
 from module.map.map_base import CampaignMap, location2node
 from module.map.map_operation import MapOperation
 from module.map.utils import location_ensure, random_direction
@@ -42,6 +43,8 @@ class Camera(MapOperation):
             # Map grid fit
             if self.config.DEVICE_CONTROL_METHOD == 'minitouch':
                 distance = self.view.swipe_base * self.config.MAP_SWIPE_MULTIPLY_MINITOUCH
+            elif self.config.DEVICE_CONTROL_METHOD == 'MaaTouch':
+                distance = self.view.swipe_base * self.config.MAP_SWIPE_MULTIPLY_MAATOUCH
             else:
                 distance = self.view.swipe_base * self.config.MAP_SWIPE_MULTIPLY
             # Optimize swipe path
@@ -124,9 +127,10 @@ class Camera(MapOperation):
                 logger.warning('Perspective error caused by info bar')
                 self.handle_info_bar()
                 return False
-            elif self.appear(GET_ITEMS_1):
+            elif self.appear(GET_ITEMS_1, offset=5):
                 logger.warning('Perspective error caused by get_items')
-                self.handle_mystery()
+                # Don't use handle_mystery() here since OpSi overrides it.
+                self.device.click(GET_ITEMS_1)
                 return False
             elif self.appear(GET_ITEMS_1_RYZA, offset=(20, 20)):
                 logger.warning('Perspective error caused by GET_ITEMS_1_RYZA')
@@ -139,6 +143,10 @@ class Camera(MapOperation):
             elif self.is_in_stage():
                 logger.warning('Image is in stage')
                 raise CampaignEnd('Image is in stage')
+            elif self.appear(MAP_PREPARATION, offset=(20, 20)):
+                logger.warning('Image is in MAP_PREPARATION')
+                self.enter_map_cancel()
+                raise CampaignEnd('Image is in MAP_PREPARATION')
             elif self.appear(AUTO_SEARCH_MENU_CONTINUE, offset=self._auto_search_menu_offset):
                 logger.warning('Image is in auto search menu')
                 self.ensure_auto_search_exit()
@@ -179,6 +187,10 @@ class Camera(MapOperation):
                 logger.warning(string)
                 x, y = string.split('=')[1].strip('() ').split(',')
                 self._map_swipe((-int(x.strip()), -int(y.strip())))
+            # Finally check if game is alive
+            elif not self.device.app_is_running():
+                logger.error('Trying to update camera but game died')
+                raise GameNotRunningError
             else:
                 raise e
 

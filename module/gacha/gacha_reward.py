@@ -203,6 +203,10 @@ class RewardGacha(GachaUI, GeneralShop, Retirement):
             else:
                 self.device.screenshot()
 
+            if self.appear(BUILD_QUEUE_EMPTY, offset=(20, 20)):
+                self.gacha_side_navbar_ensure(upper=1)
+                break
+            
             if self.appear_then_click(BUILD_FINISH_ORDERS, interval=3):
                 confirm_timer.reset()
                 continue
@@ -233,6 +237,11 @@ class RewardGacha(GachaUI, GeneralShop, Retirement):
             if self.appear(BUILD_SUBMIT_ORDERS) or self.appear(BUILD_SUBMIT_WW_ORDERS):
                 if confirm_timer.reached():
                     break
+
+        # Wishing pool no longer shows coins, go back to normal pools
+        if self.appear(BUILD_SUBMIT_WW_ORDERS):
+            logger.info('In wishing pool, go back to normal pools')
+            self.gacha_side_navbar_ensure(upper=1)
 
     def gacha_submit(self, skip_first_screenshot=True):
         """
