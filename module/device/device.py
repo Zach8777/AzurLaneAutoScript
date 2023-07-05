@@ -178,14 +178,14 @@ class Device(Screenshot, Control, AppControl, EmulatorManager):
             logger.warning(f'Too many click for a button: {count[0][0]}')
             logger.warning(f'History click: {[str(prev) for prev in self.click_record]}')
             logger.info('Try reconnect and restart uiautomator2')
-            self.adb_reconnect()
+            # self.adb_reconnect()
             self.install_uiautomator2()
             time.sleep(10)
         if len(count) >= 2 and count[0][1] >= 4 and count[1][1] >= 4:
             logger.warning(f'Too many click between 2 buttons: {count[0][0]}, {count[1][0]}')
             logger.warning(f'History click: {[str(prev) for prev in self.click_record]}')
             logger.info('Try reconnect and restart uiautomator2')
-            self.adb_reconnect()
+            # self.adb_reconnect()
             self.install_uiautomator2()
             time.sleep(10)
         if count[0][1] >= 12:
