@@ -8,6 +8,7 @@ from module.base.mask import Mask
 from module.base.timer import Timer
 from module.base.utils import *
 from module.dorm.assets import *
+from module.dorm.buy_furniture import BuyFurniture
 from module.logger import logger
 from module.ocr.ocr import Digit, DigitCounter
 from module.template.assets import TEMPLATE_DORM_COIN, TEMPLATE_DORM_LOVE
@@ -28,6 +29,21 @@ class OcrDormFood(DigitCounter):
         image = cv2.subtract(255, cv2.max(orange, gray))
         image = cv2.multiply(image, 2)
         return image
+
+    def after_process(self, result):
+        result = super().after_process(result)
+
+        if '/' not in result:
+            for exp in range(40000, 90001, 1000):
+                res = re.match(rf'^(\d+){exp}$', result)
+                if res:
+                    # 10005800 -> 1000/5800
+                    new = f'{res.group(1)}/{exp}'
+                    logger.info(f'OcrDormFood result {result} is revised to {new}')
+                    result = new
+                    break
+
+        return result
 
 
 OCR_FILL = OcrDormFood(OCR_DORM_FILL, name='OCR_DORM_FILL')
@@ -62,8 +78,8 @@ class RewardDorm(UI):
             out: page_dorm, with info_bar
         """
         image = MASK_DORM.apply(self.device.image)
-        loves = TEMPLATE_DORM_LOVE.match_multi(image, name='DORM_LOVE')
-        coins = TEMPLATE_DORM_COIN.match_multi(image, name='DORM_COIN')
+        loves = TEMPLATE_DORM_LOVE.match_multi(image, name='DORM_LOVE', scaling=1.5)
+        coins = TEMPLATE_DORM_COIN.match_multi(image, name='DORM_COIN', scaling=1.5)
         logger.info(f'Dorm loves: {len(loves)}, Dorm coins: {len(coins)}')
         # Complicated dorm background
         if len(loves) > 6:
@@ -201,11 +217,11 @@ class RewardDorm(UI):
 
     @cached_property
     def _dorm_food(self):
-        return ButtonGrid(origin=(411, 387), delta=(117, 0), button_shape=(95, 73), grid_shape=(6, 1), name='FOOD')
+        return ButtonGrid(origin=(395, 410), delta=(129, 0), button_shape=(105, 70), grid_shape=(6, 1), name='FOOD')
 
     @cached_property
     def _dorm_food_ocr(self):
-        grids = self._dorm_food.crop((47, 46, 91, 68), name='FOOD_AMOUNT')
+        grids = self._dorm_food.crop((54, 41, 101, 66), name='FOOD_AMOUNT')
         return Digit(grids.buttons, letter=(255, 255, 255), threshold=128, name='OCR_DORM_FOOD')
 
     def _dorm_has_food(self, button):
@@ -342,6 +358,18 @@ class RewardDorm(UI):
             if self.appear(DORM_CHECK, offset=(20, 20), interval=5):
                 self.device.click(DORM_FEED_ENTER)
                 continue
+            if self.appear(DORM_MANAGE_CHECK, offset=(20, 20), interval=5):
+                self.device.click(DORM_FURNITURE_SHOP_QUIT)
+                logger.info(f'{DORM_MANAGE_CHECK} -> {DORM_FURNITURE_SHOP_QUIT}')
+                continue
+            if self.appear(DORM_FURNITURE_SHOP_FIRST, offset=(20, 20), interval=5):
+                self.device.click(DORM_FURNITURE_SHOP_QUIT)
+                logger.info(f'{DORM_FURNITURE_SHOP_FIRST} -> {DORM_FURNITURE_SHOP_QUIT}')
+                continue
+            if self.appear(DORM_FURNITURE_SHOP_FIRST_SELECTED, offset=(20, 20), interval=5):
+                self.device.click(DORM_FURNITURE_SHOP_QUIT)
+                logger.info(f'{DORM_FURNITURE_SHOP_FIRST_SELECTED} -> {DORM_FURNITURE_SHOP_QUIT}')
+                continue
 
     def dorm_feed_quit(self, skip_first_screenshot=False):
         """
@@ -370,20 +398,20 @@ class RewardDorm(UI):
                 self.interval_clear(DORM_CHECK)
                 continue
 
-    def dorm_run(self, feed=True, collect=True):
+    def dorm_run(self, feed=True, collect=True, buy_furniture=False):
         """
         Pages:
             in: Any page
             out: page_dorm
         """
-        if not feed and not collect:
+        if not feed and not collect and not buy_furniture:
             return
 
         self.ui_ensure(page_dormmenu)
         if not self.appear(DORM_RED_DOT, offset=(30, 30)):
             logger.info('Nothing to collect. Dorm collecting skipped.')
             collect = False
-            if not feed:
+            if not feed and not buy_furniture:
                 return
         self.ui_goto(page_dorm, skip_first_screenshot=True)
 
@@ -398,6 +426,10 @@ class RewardDorm(UI):
         if collect:
             logger.hr('Dorm collect', level=1)
             self.dorm_collect()
+
+        if buy_furniture:
+            logger.hr('Dorm buy furniture', level=1)
+            BuyFurniture(self.config, self.device).run()
 
     def get_dorm_ship_amount(self, skip_first_screenshot=True):
         """
@@ -482,11 +514,14 @@ class RewardDorm(UI):
             in: Any page
             out: page_dorm
         """
-        if not self.config.Dorm_Feed and not self.config.Dorm_Collect:
+        if not self.config.Dorm_Feed and not self.config.Dorm_Collect \
+                and not self.config.BuyFurniture_Enable:
             self.config.Scheduler_Enable = False
             self.config.task_stop()
 
-        self.dorm_run(feed=self.config.Dorm_Feed, collect=self.config.Dorm_Collect)
+        self.dorm_run(feed=self.config.Dorm_Feed, 
+                      collect=self.config.Dorm_Collect,
+                      buy_furniture=self.config.BuyFurniture_Enable)
 
         # Scheduler
         ships = self.get_dorm_ship_amount()

@@ -280,14 +280,6 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
             logger.info('Not in GemsFarming, skip')
             return 0
 
-        def server_support_flagship_retire() -> bool:
-            return self.config.SERVER in ['cn', 'en', 'jp']
-
-        if not server_support_flagship_retire():
-            logger.info(f'Server {self.config.SERVER} does not yet support flagships retirement, skip')
-            logger.info('Please contact the developer to improve as soon as possible')
-            return 0
-
         self.dock_filter_set(index='cv', rarity='common', extra='not_level_max', sort='level')
         self.dock_favourite_set(False)
 
@@ -476,7 +468,7 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
                                   color=button.color,
                                   name=f'TEMPLATE_{common_cv_name}_RETIRE')
 
-                return None
+            return None
         else:
 
             template = globals()[

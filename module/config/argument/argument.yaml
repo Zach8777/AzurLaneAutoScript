@@ -367,6 +367,13 @@ Dorm:
   Collect: true
   Feed: true
   FeedFilter: 20000 > 10000 > 5000 > 3000 > 2000 > 1000
+BuyFurniture:
+  Enable: false
+  BuyOption:
+    type: select
+    value: all
+    option: [ set, all ]
+  LastRun: 2020-01-01 00:00:00
 Meowfficer:
   BuyAmount: 1
   FortChoreMeowfficer: true
@@ -484,7 +491,7 @@ CoreShop:
 ShipyardDr:
   ResearchSeries:
     value: 2
-    option: [ 2 ]
+    option: [ 2, 3 ]
   ShipIndex:
     value: 0
     option: [ 0, 1, 2, 3, 4, 5, 6 ]
@@ -493,7 +500,7 @@ ShipyardDr:
 Shipyard:
   ResearchSeries:
     value: 1
-    option: [ 1, 2, 3 ]
+    option: [ 1, 2, 3, 4 ]
   ShipIndex:
     value: 0
     option: [ 0, 1, 2, 3, 4, 5, 6 ]

@@ -1,4 +1,3 @@
-import re
 from datetime import datetime
 
 import module.config.server as server
@@ -12,12 +11,10 @@ from module.handler.assets import GET_MISSION, POPUP_CANCEL, POPUP_CONFIRM
 from module.logger import logger
 from module.map.map_grids import SelectedGrids
 from module.ocr.ocr import DigitCounter, Duration, Ocr
-from module.retire.assets import DOCK_EMPTY, DOCK_CHECK, SHIP_CONFIRM
-from module.retire.dock import CARD_GRIDS, Dock, CARD_LEVEL_GRIDS
+from module.retire.assets import DOCK_CHECK, DOCK_EMPTY, SHIP_CONFIRM
+from module.retire.dock import CARD_GRIDS, CARD_LEVEL_GRIDS, Dock
 from module.tactical.assets import *
-from module.ui.assets import (BACK_ARROW, MAIN_GOTO_REWARD,
-                              REWARD_GOTO_TACTICAL, REWARD_CHECK,
-                              TACTICAL_CHECK)
+from module.ui.assets import (BACK_ARROW, MAIN_GOTO_REWARD, REWARD_CHECK, REWARD_GOTO_TACTICAL, TACTICAL_CHECK)
 from module.ui.page import page_reward
 
 SKILL_GRIDS = ButtonGrid(origin=(315, 140), delta=(621, 132), button_shape=(621, 119), grid_shape=(1, 3), name='SKILL')
@@ -53,6 +50,21 @@ class ExpOnBookSelect(DigitCounter):
         else:
             image = image_left_strip(image, threshold=105, length=42)
         return image
+
+    def after_process(self, result):
+        result = super().after_process(result)
+
+        if '/' not in result:
+            for exp in [5800, 4400, 3200, 2200, 1400, 800, 400, 200, 100]:
+                res = re.match(rf'^(\d+){exp}$', result)
+                if res:
+                    # 10005800 -> 1000/5800
+                    new = f'{res.group(1)}/{exp}'
+                    logger.info(f'ExpOnBookSelect result {result} is revised to {new}')
+                    result = new
+                    break
+
+        return result
 
 
 class ExpOnSkillSelect(Ocr):
@@ -284,6 +296,7 @@ class RewardTacticalClass(Dock):
         if not self._tactical_books_get():
             return False
 
+        self.device.click_record_clear()
         # Ensure first book is focused
         # For slow PCs, selection may have changed
         first = self.books[0]
